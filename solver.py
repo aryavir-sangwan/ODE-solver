@@ -127,14 +127,10 @@ def convergence_study(f, y_exact, y0, x_span, n_values):
     rk4_errors = []
     ab2_errors = []
     am_errors = []
-    h_values = []
     
     a, b = x_span
     
     for n in n_values:
-        h = (b - a) / n
-        h_values.append(h)
-        
         # Euler
         x_euler, y_euler = euler_method(f, y0, x_span, n)
         error_euler = np.max(np.abs(y_euler - y_exact(x_euler)))
@@ -162,24 +158,26 @@ def convergence_study(f, y_exact, y0, x_span, n_values):
     
     # Plot on log-log scale
     plt.figure(figsize=(12, 7))
-    plt.loglog(h_values, euler_errors, 'o-', label='Euler', linewidth=2)
-    plt.loglog(h_values, improved_euler_errors, 'v-', label='Improved Euler', linewidth=2)
-    plt.loglog(h_values, rk4_errors, 's-', label='RK4', linewidth=2)
-    plt.loglog(h_values, ab2_errors, '^-', label='Adams-Bashforth 2', linewidth=2)
-    plt.loglog(h_values, am_errors, 'd-', label='Adams-Moulton PC', linewidth=2)
+    plt.loglog(n_values, euler_errors, 'o-', label='Euler', linewidth=2)
+    plt.loglog(n_values, improved_euler_errors, 'v-', label='Improved Euler', linewidth=2)
+    plt.loglog(n_values, rk4_errors, 's-', label='RK4', linewidth=2)
+    plt.loglog(n_values, ab2_errors, '^-', label='Adams-Bashforth 2', linewidth=2)
+    plt.loglog(n_values, am_errors, 'd-', label='Adams-Moulton PC', linewidth=2)
     
-    # Reference lines for theoretical convergence
-    plt.loglog(h_values, h_values, '--', label='O(h)', alpha=0.5, color='gray')
-    plt.loglog(h_values, np.array(h_values)**2, '--', label='O(h²)', alpha=0.5, color='gray')
-    plt.loglog(h_values, np.array(h_values)**4, '--', label='O(h⁴)', alpha=0.5, color='gray')
+    # Reference lines for theoretical convergence (n^-1, n^-2, n^-4)
+    n_array = np.array(n_values, dtype=float)
+    plt.loglog(n_values, 1/n_array, '--', label='O(n⁻¹)', alpha=0.5, color='gray')
+    plt.loglog(n_values, 1/n_array**2, '--', label='O(n⁻²)', alpha=0.5, color='gray')
+    plt.loglog(n_values, 1/n_array**4, '--', label='O(n⁻⁴)', alpha=0.5, color='gray')
     
-    plt.xlabel('Step size h', fontsize=12)
+    plt.xlabel('Number of steps (n)', fontsize=12)
     plt.ylabel('Max error', fontsize=12)
     plt.title('Convergence Comparison: All Methods', fontsize=14)
     plt.legend(fontsize=11)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     plt.show()
+    
 
 # Example usage
 f = lambda x, y: -2*y
