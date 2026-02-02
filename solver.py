@@ -36,6 +36,24 @@ def rk4(f, y0, x_span, n):
         y[i+1] = y[i] + (h/6) * (k1 + 2*k2 + 2*k3 + k4)
     
     return x, y
+def improved_euler(f, y0, x_span, n):
+    """
+    Improved Euler (Heun's method / RK2)
+    Predictor-corrector approach
+    Error: O(h²)
+    """
+    a, b = x_span
+    h = (b - a) / n
+    x = np.linspace(a, b, n+1)
+    y = np.zeros(n+1)
+    y[0] = y0
+    
+    for i in range(n):
+        k1 = f(x[i], y[i])
+        k2 = f(x[i] + h, y[i] + h*k1)
+        y[i+1] = y[i] + (h/2) * (k1 + k2)
+    
+    return x, y
 
 def adams_bashforth_2(f, y0, x_span, n):
     """
@@ -105,6 +123,7 @@ def convergence_study(f, y_exact, y0, x_span, n_values):
     n_values: list of n values to test (e.g., [10, 20, 50, 100])
     """
     euler_errors = []
+    improved_euler_errors = []
     rk4_errors = []
     ab2_errors = []
     am_errors = []
@@ -120,6 +139,11 @@ def convergence_study(f, y_exact, y0, x_span, n_values):
         x_euler, y_euler = euler_method(f, y0, x_span, n)
         error_euler = np.max(np.abs(y_euler - y_exact(x_euler)))
         euler_errors.append(error_euler)
+        
+        # Improved Euler
+        x_ie, y_ie = improved_euler(f, y0, x_span, n)
+        error_ie = np.max(np.abs(y_ie - y_exact(x_ie)))
+        improved_euler_errors.append(error_ie)
         
         # RK4
         x_rk4, y_rk4 = rk4(f, y0, x_span, n)
@@ -137,22 +161,24 @@ def convergence_study(f, y_exact, y0, x_span, n_values):
         am_errors.append(error_am)
     
     # Plot on log-log scale
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(12, 7))
     plt.loglog(h_values, euler_errors, 'o-', label='Euler', linewidth=2)
+    plt.loglog(h_values, improved_euler_errors, 'v-', label='Improved Euler', linewidth=2)
     plt.loglog(h_values, rk4_errors, 's-', label='RK4', linewidth=2)
     plt.loglog(h_values, ab2_errors, '^-', label='Adams-Bashforth 2', linewidth=2)
     plt.loglog(h_values, am_errors, 'd-', label='Adams-Moulton PC', linewidth=2)
     
     # Reference lines for theoretical convergence
-    plt.loglog(h_values, h_values, '--', label='O(h)', alpha=0.5)
-    plt.loglog(h_values, np.array(h_values)**2, '--', label='O(h²)', alpha=0.5)
-    plt.loglog(h_values, np.array(h_values)**4, '--', label='O(h⁴)', alpha=0.5)
+    plt.loglog(h_values, h_values, '--', label='O(h)', alpha=0.5, color='gray')
+    plt.loglog(h_values, np.array(h_values)**2, '--', label='O(h²)', alpha=0.5, color='gray')
+    plt.loglog(h_values, np.array(h_values)**4, '--', label='O(h⁴)', alpha=0.5, color='gray')
     
     plt.xlabel('Step size h', fontsize=12)
     plt.ylabel('Max error', fontsize=12)
     plt.title('Convergence Comparison: All Methods', fontsize=14)
     plt.legend(fontsize=11)
     plt.grid(True, alpha=0.3)
+    plt.tight_layout()
     plt.show()
 
 # Example usage
