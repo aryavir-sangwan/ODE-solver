@@ -10,6 +10,9 @@
 ![Solver Page 3](images/Adams%20Bashforth%20and%20Adams%20Moulton.png)
 # diffrentiation
 
+
+
+
 ![formulas page 1](images/FD.png)
 # integration 
 
